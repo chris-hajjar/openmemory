@@ -5,6 +5,7 @@ import { supabase } from "./supabase";
 const ALLOWED_TABLES = [
   "memories",
   "tasks",
+  "projects",
   "finances",
   "portfolio_notes",
   "schedule",
@@ -16,7 +17,8 @@ type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
 const TABLE_DESCRIPTIONS: Record<AllowedTable, string> = {
   memories: "General notes, thoughts, and things to remember",
-  tasks: "Project tasks and todos (fields: title, description, project, status, priority, due_date, tags)",
+  tasks: "Personal to-dos and life admin (fields: title, description, project, status, priority, due_date, tags)",
+  projects: "Tech projects and software initiatives (fields: title, description, status, priority, due_date, tags)",
   finances: "Income and expense tracking (fields: type, amount, description, category, date, tags)",
   portfolio_notes: "Trading ideas, stock theses, and market observations (fields: ticker, title, content, note_type, tags)",
   schedule: "Events and important dates (fields: title, description, event_date, end_date, all_day, tags)",
