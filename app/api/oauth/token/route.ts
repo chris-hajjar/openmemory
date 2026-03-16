@@ -35,9 +35,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "invalid_grant" }, { status: 400 });
     }
 
-    // Verify PKCE code_verifier against stored code_challenge
-    if (!verifyCodeChallenge(code_verifier, tokens.codeChallenge)) {
-      return NextResponse.json({ error: "invalid_grant" }, { status: 400 });
+    // Verify PKCE code_verifier if a challenge was stored
+    if (tokens.codeChallenge && code_verifier) {
+      if (!verifyCodeChallenge(code_verifier, tokens.codeChallenge)) {
+        return NextResponse.json({ error: "invalid_grant" }, { status: 400 });
+      }
     }
 
     return NextResponse.json({

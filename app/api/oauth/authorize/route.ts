@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { getGoogleAuthUrl } from "@/lib/google-auth";
 import crypto from "crypto";
 
-const baseUrl = process.env.NEXTAUTH_URL ?? "https://openmemory.vercel.app";
+const baseUrl = process.env.NEXTAUTH_URL ?? "https://openmemory-mauve.vercel.app";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -23,17 +23,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "invalid_request", error_description: "redirect_uri required" }, { status: 400 });
   }
 
-  if (!codeChallenge || codeChallengeMethod !== "S256") {
+  // PKCE is optional — some clients (confidential server-side clients) don't use it.
+  // If provided, validate that it's S256.
+  if (codeChallenge && codeChallengeMethod?.toUpperCase() !== "S256") {
     return NextResponse.json(
-      { error: "invalid_request", error_description: "PKCE S256 required" },
+      { error: "invalid_request", error_description: "Only S256 code_challenge_method is supported" },
       { status: 400 }
     );
   }
 
-  // Store PKCE state in Supabase
   const { error } = await supabase.from("oauth_pkce_state").insert({
     state,
-    code_challenge: codeChallenge,
+    code_challenge: codeChallenge ?? "",
     redirect_uri: redirectUri,
     client_id: clientId ?? "mcp-client",
   });
