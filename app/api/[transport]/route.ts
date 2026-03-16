@@ -128,9 +128,25 @@ async function verifyToken(
   };
 }
 
-const handler = withMcpAuth(mcpHandler, verifyToken, {
+const authHandler = withMcpAuth(mcpHandler, verifyToken, {
   required: true,
   resourceUrl: baseUrl,
 });
+
+const handler = async (req: Request) => {
+  const res = await authHandler(req);
+  // On initial unauthenticated challenge, strip error fields per RFC 6750
+  if (res.status === 401 && !req.headers.get("authorization")) {
+    const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+    return new Response(res.body, {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadataUrl}"`,
+        "Content-Type": "application/json",
+      },
+    });
+  }
+  return res;
+};
 
 export { handler as GET, handler as POST };

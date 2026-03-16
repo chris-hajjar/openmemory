@@ -7,6 +7,7 @@ export async function GET() {
     issuer: baseUrl,
     authorization_endpoint: `${baseUrl}/api/oauth/authorize`,
     token_endpoint: `${baseUrl}/api/oauth/token`,
+    registration_endpoint: `${baseUrl}/api/oauth/register`,
     response_types_supported: ["code"],
     grant_types_supported: ["authorization_code", "refresh_token"],
     code_challenge_methods_supported: ["S256"],
