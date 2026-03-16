@@ -38,7 +38,8 @@ export async function issueTokens(email: string): Promise<{
 export async function issueAuthCode(
   email: string,
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
+  codeChallenge: string
 ): Promise<string> {
   const code = generateToken();
   const codeExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -48,6 +49,7 @@ export async function issueAuthCode(
     .update({
       code,
       code_expires_at: codeExpiresAt.toISOString(),
+      code_challenge: codeChallenge,
     })
     .eq("access_token", accessToken);
 
@@ -61,6 +63,7 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   refreshToken: string;
   expiresIn: number;
   email: string;
+  codeChallenge: string;
 } | null> {
   const { data, error } = await supabase
     .from("oauth_sessions")
@@ -89,6 +92,7 @@ export async function exchangeCodeForTokens(code: string): Promise<{
       (new Date(data.token_expires_at).getTime() - Date.now()) / 1000
     ),
     email: data.google_email,
+    codeChallenge: data.code_challenge,
   };
 }
 

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForTokens, refreshAccessToken } from "@/lib/mcp-tokens";
-import { supabase } from "@/lib/supabase";
 import crypto from "crypto";
 
 function verifyCodeChallenge(verifier: string, challenge: string): boolean {
-  const hash = crypto
-    .createHash("sha256")
-    .update(verifier)
-    .digest("base64url");
+  const hash = crypto.createHash("sha256").update(verifier).digest("base64url");
   return hash === challenge;
 }
 
@@ -24,9 +20,8 @@ export async function POST(request: NextRequest) {
 
   const grantType = body.grant_type;
 
-  // Authorization code grant (PKCE)
   if (grantType === "authorization_code") {
-    const { code, code_verifier, redirect_uri } = body;
+    const { code, code_verifier } = body;
 
     if (!code || !code_verifier) {
       return NextResponse.json(
@@ -35,24 +30,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the original PKCE challenge from the session
-    const { data: session } = await supabase
-      .from("oauth_sessions")
-      .select("*")
-      .eq("code", code)
-      .single();
-
-    if (!session) {
+    const tokens = await exchangeCodeForTokens(code);
+    if (!tokens) {
       return NextResponse.json({ error: "invalid_grant" }, { status: 400 });
     }
 
-    // We need to look up the code_challenge that was used — stored temporarily in pkce_state
-    // Since we deleted pkce_state after callback, we store code_challenge in the session
-    // For now, skip strict PKCE verification (state was already validated at callback)
-    // In production, you'd store code_challenge in oauth_sessions during callback
-
-    const tokens = await exchangeCodeForTokens(code);
-    if (!tokens) {
+    // Verify PKCE code_verifier against stored code_challenge
+    if (!verifyCodeChallenge(code_verifier, tokens.codeChallenge)) {
       return NextResponse.json({ error: "invalid_grant" }, { status: 400 });
     }
 
@@ -65,7 +49,6 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Refresh token grant
   if (grantType === "refresh_token") {
     const { refresh_token } = body;
 

@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Issue tokens and auth code
+  // Issue tokens and auth code (pass code_challenge for PKCE verification at token exchange)
   const { accessToken, refreshToken } = await issueTokens(email);
-  const authCode = await issueAuthCode(email, accessToken, refreshToken);
+  const authCode = await issueAuthCode(email, accessToken, refreshToken, pkceData.code_challenge);
 
   // Redirect back to MCP client with auth code
   const redirectUrl = new URL(pkceData.redirect_uri);
