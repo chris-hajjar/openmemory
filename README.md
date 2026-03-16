@@ -31,7 +31,8 @@ Claude: "Log a $450 expense for AWS, category: infrastructure"
 | Table | Purpose |
 |-------|---------|
 | `memories` | General notes and things to remember |
-| `tasks` | Todos across projects |
+| `tasks` | Personal to-dos and life admin |
+| `projects` | Tech projects and software initiatives |
 | `finances` | Income and expense tracking |
 | `portfolio_notes` | Trading ideas and stock research |
 | `schedule` | Events and important dates |
@@ -43,8 +44,7 @@ Claude: "Log a $450 expense for AWS, category: infrastructure"
 ### 1. Supabase
 
 1. Create a new project at [supabase.com](https://supabase.com)
-2. Run [`migrations/001_initial_schema.sql`](migrations/001_initial_schema.sql) in the SQL editor
-3. Run [`migrations/002_oauth_sessions.sql`](migrations/002_oauth_sessions.sql)
+2. Run all migration files in [`migrations/`](migrations/) in order (001 → 004) in the SQL editor
 4. Copy your project URL and service role key (Settings → API)
 
 ### 2. Google OAuth
